@@ -1,4 +1,5 @@
 #!/usr/bin/sh
+set -e
 
 DIST_DIR="./dist"
 mkdir -p "$DIST_DIR"
