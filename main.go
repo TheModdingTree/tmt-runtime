@@ -23,6 +23,23 @@ func main() {
 	}
 }
 
+func fileHandler(dir string) http.Handler {
+	files := http.FileServer(http.Dir(dir))
+
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if filepath.Ext(request.URL.Path) == "" {
+			file := filepath.Join(dir, filepath.FromSlash(request.URL.Path)) + ".js"
+
+			if info, err := os.Stat(file); err == nil && !info.IsDir() {
+				http.Redirect(writer, request, request.URL.Path+".js", http.StatusTemporaryRedirect)
+				return
+			}
+		}
+
+		files.ServeHTTP(writer, request)
+	})
+}
+
 func run() error {
 	dirFlag := flag.String("dir", ".", "The directory which contains your mod files")
 	flag.Parse()
@@ -51,7 +68,7 @@ func run() error {
 	port := listener.Addr().(*net.TCPAddr).Port
 	url := fmt.Sprintf("http://127.0.0.1:%d/", port)
 
-	server := &http.Server{Handler: http.FileServer(http.Dir(dir))}
+	server := &http.Server{Handler: fileHandler(dir)}
 	serveErr := make(chan error, 1)
 
 	go func() {
