@@ -27,6 +27,8 @@ func fileHandler(dir string) http.Handler {
 	files := http.FileServer(http.Dir(dir))
 
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Cache-Control", "no-store")
+
 		if filepath.Ext(request.URL.Path) == "" {
 			file := filepath.Join(dir, filepath.FromSlash(request.URL.Path)) + ".js"
 
