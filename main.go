@@ -42,6 +42,8 @@ func fileHandler(dir string) http.Handler {
 	})
 }
 
+const port = 8080
+
 func run() error {
 	dirFlag := flag.String("dir", ".", "The directory which contains your mod files")
 	flag.Parse()
@@ -61,14 +63,13 @@ func run() error {
 		return fmt.Errorf("project path is not a directory: %q", dir)
 	}
 
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	if err != nil {
 		return err
 	}
 	defer listener.Close()
 
-	port := listener.Addr().(*net.TCPAddr).Port
-	url := fmt.Sprintf("http://127.0.0.1:%d/", port)
+	url := fmt.Sprintf("http://localhost:%d/", port)
 
 	server := &http.Server{Handler: fileHandler(dir)}
 	serveErr := make(chan error, 1)
